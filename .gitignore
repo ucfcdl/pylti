@@ -47,8 +47,11 @@ coverage.xml
 # Translations
 *.mo
 
-#PyCharm
+# PyCharm
 .idea
 
-#Coverage
+# Coverage
 htmlcov/*
+
+# Virtual Environment
+venv/

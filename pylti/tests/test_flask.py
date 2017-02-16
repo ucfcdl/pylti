@@ -307,6 +307,35 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
         self.app.get(unknown_url)
         self.assertTrue(self.has_exception())
 
+    def test_access_to_oauth_resource_custom_role_as_staff(self):
+        """
+        Verify that default roles are overwritten by custom roles.
+        """
+        app.config['PYLTI_CONFIG']['roles'] = {
+            'custom': ['Custom']
+        }
+        consumers = self.consumers
+        url = 'http://localhost/initial_custom?'
+        custom_url = self.generate_launch_request(
+            consumers, url, roles='Staff'
+        )
+        self.app.get(custom_url)
+        self.assertTrue(self.has_exception())
+
+    def test_access_to_oauth_resource_custom_role(self):
+        """Verify that custom roles correctly allow access."""
+
+        app.config['PYLTI_CONFIG']['roles'] = {
+            'custom': ['Custom']
+        }
+        consumers = self.consumers
+        url = 'http://localhost/initial_custom?'
+        custom_url = self.generate_launch_request(
+            consumers, url, roles='Custom'
+        )
+        self.app.get(custom_url)
+        self.assertFalse(self.has_exception())
+
     @staticmethod
     def generate_launch_request(consumers, url,
                                 lit_outcome_service_url=None,

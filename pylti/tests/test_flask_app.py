@@ -168,6 +168,19 @@ def initial_unknown_route(lti):
     return "hi"  # pragma: no cover
 
 
+@app.route("/initial_custom", methods=['GET', 'POST'])
+@lti_flask(error=error, request='initial', role='custom', app=app)
+def initial_custom_route(lti):
+    # pylint: disable=unused-argument,
+    """
+    Access route with 'initial' request and 'custom' role.
+
+    :param lti: `lti` object
+    :return: string "hi"
+    """
+    return "hi"  # pragma: no cover
+
+
 @app.route("/setup_session")
 def setup_session():
     """
