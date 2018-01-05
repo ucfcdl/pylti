@@ -175,11 +175,11 @@ class LTI(object):
 
         app_config = self.lti_kwargs['app'].config
         config = app_config.get('PYLTI_CONFIG', dict())
-        # Override default LTI_ROLES with user-provided
-        lti_roles = config.get('roles', LTI_ROLES)
+        # Update default LTI_ROLES to include user-provided roles
+        LTI_ROLES.update(config.get('roles', dict()))
 
-        if role in lti_roles:
-            role_list = lti_roles[role]
+        if role in LTI_ROLES:
+            role_list = LTI_ROLES[role]
             # find the intersection of the roles
             roles = set(role_list) & set(roles)
             is_user_role_there = len(roles) >= 1
