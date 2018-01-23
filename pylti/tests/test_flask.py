@@ -4,11 +4,12 @@ Test pylti/test_flask.py module
 """
 from __future__ import absolute_import
 import unittest
-import urllib
 
 import httpretty
 import mock
 import oauthlib.oauth1
+
+from six.moves.urllib.parse import urlencode
 
 from pylti.common import LTIException
 from pylti.flask import LTI
@@ -188,7 +189,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get(new_url)
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, u'person')
+        self.assertEqual(ret.data.decode('utf-8'), u'person')
 
     def test_access_to_oauth_resource_email_passed(self):
         """
@@ -204,7 +205,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get(new_url)
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, u'email@email.com')
+        self.assertEqual(ret.data.decode('utf-8'), u'email@email.com')
 
     def test_access_to_oauth_resource_name_and_email_passed(self):
         """
@@ -221,7 +222,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get(new_url)
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, u'person')
+        self.assertEqual(ret.data.decode('utf-8'), u'person')
 
     def test_access_to_oauth_resource_staff_only_as_student(self):
         """
@@ -377,7 +378,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
         if add_params is not None:
             params.update(add_params)
 
-        urlparams = urllib.urlencode(params)
+        urlparams = urlencode(params)
 
         client = oauthlib.oauth1.Client('__consumer_key__',
                                         client_secret='__lti_secret__',
@@ -471,11 +472,11 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get("/post_grade/1.0")
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, "grade=True")
+        self.assertEqual(ret.data.decode('utf-8'), "grade=True")
 
         ret = self.app.get("/post_grade/2.0")
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, "grade=False")
+        self.assertEqual(ret.data.decode('utf-8'), "grade=False")
 
     @httpretty.activate
     def test_access_to_oauth_resource_post_grade_fail(self):
@@ -506,7 +507,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get("/post_grade/1.0")
         self.assertTrue(self.has_exception())
-        self.assertEqual(ret.data, "error")
+        self.assertEqual(ret.data.decode('utf-8'), "error")
 
     @httpretty.activate
     def test_access_to_oauth_resource_post_grade_fix_url(self):
@@ -527,11 +528,11 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get("/post_grade/1.0")
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, "grade=True")
+        self.assertEqual(ret.data.decode('utf-8'), "grade=True")
 
         ret = self.app.get("/post_grade/2.0")
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, "grade=False")
+        self.assertEqual(ret.data.decode('utf-8'), "grade=False")
 
     @httpretty.activate
     def test_access_to_oauth_resource_post_grade2(self):
@@ -555,11 +556,11 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get("/post_grade2/1.0")
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, "grade=True")
+        self.assertEqual(ret.data.decode('utf-8'), "grade=True")
 
         ret = self.app.get("/post_grade2/2.0")
         self.assertFalse(self.has_exception())
-        self.assertEqual(ret.data, "grade=False")
+        self.assertEqual(ret.data.decode('utf-8'), "grade=False")
 
     def request_callback(self, request, cburi, headers):
         # pylint: disable=unused-argument
@@ -597,7 +598,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
 
         ret = self.app.get("/post_grade2/1.0")
         self.assertTrue(self.has_exception())
-        self.assertEqual(ret.data, "error")
+        self.assertEqual(ret.data.decode('utf-8'), "error")
 
     @mock.patch.object(LTI, '_check_role')
     @mock.patch.object(LTI, 'verify')
@@ -607,7 +608,7 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
         mock_verify.return_value = True
         response = self.app.get('/no_app')
         self.assertEqual(200, response.status_code)
-        self.assertEqual('hi', response.data)
+        self.assertEqual('hi', response.data.decode('utf-8'))
 
     def test_default_decorator(self):
         """
@@ -627,4 +628,5 @@ edge.edx.org-i4x-StarX-StarX_DEMO-lti-40559041895b4065b2818c23b9cd9da8\
         # pylint: disable=maybe-no-member
         response = self.app.get('/default_lti')
         self.assertEqual(500, response.status_code)
-        self.assertEqual("There was an LTI communication error", response.data)
+        self.assertEqual("There was an LTI communication error",
+                         response.data.decode('utf-8'))
