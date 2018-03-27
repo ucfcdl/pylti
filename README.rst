@@ -33,6 +33,19 @@ Flask      `mit_lti_flask_sample
            A skeleton example for the Flask framework that consumes the PyLTI library
 =========  ============
 
+
+PYLTI_CONFIG = {
+    "consumers": {
+        os.environ.get("CONSUMER_KEY", "CHANGEME"): {
+            "secret": os.environ.get("LTI_SECRET", "CHANGEME"),
+        }
+    },
+    'roles': {
+        'admin': ['Administrator', 'urn:lti:instrole:ims/lis/Administrator'],
+        'student': ['Student', 'urn:lti:instrole:ims/lis/Student']
+    }
+}
+
 Dependencies:
 =============
 * Python 2.7+ or Python 3.4+

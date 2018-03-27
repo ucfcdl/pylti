@@ -96,15 +96,32 @@ class LTI(object):
 
     def _verify_any(self):
         """
-        Verify that request is in session or initial request
+        Verify that an initial request has been made, or failing that, that
+        the request is in the session
 
         :raises: LTIException
         """
         log.debug('verify_any enter')
-        try:
+
+        # Check to see if there is a new LTI launch request incoming
+        newrequest = False
+        if flask_request.method == 'POST':
+            params = flask_request.form.to_dict()
+            initiation = "basic-lti-launch-request"
+            if params.get("lti_message_type", None) == initiation:
+                newrequest = True
+                # Scrub the session of the old authentication
+                for prop in LTI_PROPERTY_LIST:
+                    if session.get(prop, None):
+                        del session[prop]
+                session[LTI_SESSION_KEY] = False
+
+        # Attempt the appropriate validation
+        # Both of these methods raise LTIException as necessary
+        if newrequest:
+             self.verify_request()
+        else:
             self._verify_session()
-        except LTINotInSessionException:
-            self.verify_request()
 
     @staticmethod
     def _verify_session():
@@ -178,6 +195,7 @@ class LTI(object):
         # Update default LTI_ROLES to include user-provided roles
         LTI_ROLES.update(config.get('roles', dict()))
 
+
         if role in LTI_ROLES:
             role_list = LTI_ROLES[role]
             # find the intersection of the roles
@@ -187,6 +205,9 @@ class LTI(object):
                 "is_role roles_list=%s role=%s in list=%s", role_list,
                 roles, is_user_role_there
             )
+
+            print(role_list, role, is_user_role_there)
+
             return is_user_role_there
         else:
             raise LTIException("Unknown role {}.".format(role))
@@ -203,6 +224,7 @@ class LTI(object):
         log.debug(
             "check_role lti_role=%s decorator_role=%s", self.role, role
         )
+        print("check_role lti_role=%s decorator_role=%s", self.role, role)
         if not (role == u'any' or self.is_role(role)):
             raise LTIRoleException('Not authorized.')
 
